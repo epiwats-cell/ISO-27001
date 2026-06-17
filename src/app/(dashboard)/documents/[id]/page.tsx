@@ -201,8 +201,8 @@ export default function DocumentDetailPage({ params }: { params: Promise<{ id: s
             {/* Actions */}
             <div className="space-y-2">
               <a
-                href={doc.filePath}
-                download
+                href={`/api/files/${doc.filePath.split("/").pop()}`}
+                download={doc.fileName}
                 className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
               >
                 <Download className="w-4 h-4" />

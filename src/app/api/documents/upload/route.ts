@@ -25,7 +25,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const uploadDir = path.join(process.cwd(), "uploads");
+    const uploadDir = process.env.UPLOAD_DIR
+      ? path.join(process.env.UPLOAD_DIR, "uploads")
+      : path.join(process.cwd(), "uploads");
     await mkdir(uploadDir, { recursive: true });
 
     const ext = path.extname(file.name);

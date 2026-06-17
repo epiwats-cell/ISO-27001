@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: iso-27001-management
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: node scripts/start.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        value: file:/var/data/iso27001.db
+      - key: UPLOAD_DIR
+        value: /var/data
+    disk:
+      name: iso27001-data
+      mountPath: /var/data
+      sizeGB: 5

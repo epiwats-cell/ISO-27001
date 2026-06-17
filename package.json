@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:render": "node scripts/start.js",
     "lint": "next lint",
+    "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts",
     "db:setup": "prisma db push && ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts"
