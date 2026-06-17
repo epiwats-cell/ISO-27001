@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("user")
+  department String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  documents Document[]
+  auditLogs AuditLog[]
+}
+
+model ISOControl {
+  id          String     @id @default(cuid())
+  code        String     @unique
+  name        String
+  nameTh      String
+  description String
+  order       Int
+  documents   Document[]
+}
+
+model Document {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  fileName    String
+  fileSize    Int
+  fileType    String
+  filePath    String
+  version     String     @default("1.0")
+  status      String     @default("draft")
+  controlId   String
+  control     ISOControl @relation(fields: [controlId], references: [id])
+  uploadedBy  String
+  uploader    User       @relation(fields: [uploadedBy], references: [id])
+  tags        String?
+  expiryDate  DateTime?
+  reviewDate  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  auditLogs   AuditLog[]
+}
+
+model AuditLog {
+  id         String    @id @default(cuid())
+  action     String
+  entityType String
+  entityId   String
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  documentId String?
+  document   Document? @relation(fields: [documentId], references: [id])
+  details    String?
+  createdAt  DateTime  @default(now())
+}
