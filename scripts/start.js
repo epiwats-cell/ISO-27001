@@ -25,7 +25,7 @@ console.log(`New database: ${isNewDb}`);
 
 try {
   console.log("Syncing database schema...");
-  execSync("./node_modules/.bin/prisma db push", {
+  execSync("./node_modules/.bin/prisma db push --schema=./prisma/schema.prisma", {
     stdio: "inherit",
     env: { ...process.env, DATABASE_URL: dbUrl },
   });
@@ -49,6 +49,5 @@ try {
 const port = process.env.PORT || 8080;
 console.log(`Starting Next.js on port ${port}...`);
 
-// For standalone output
 process.env.PORT = String(port);
-require(path.join(process.cwd(), "server.js"));
+execSync(`./node_modules/.bin/next start -p ${port}`, { stdio: "inherit" });

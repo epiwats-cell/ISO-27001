@@ -1,52 +1,27 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine
 
-# Install dependencies only when needed
-FROM base AS deps
 RUN apk add --no-cache libc6-compat openssl
+
 WORKDIR /app
+
+# Copy package files and prisma schema
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
+
+# Install all dependencies
 RUN npm install --legacy-peer-deps
 
-# Rebuild source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copy source code
 COPY . .
-RUN npx prisma generate
+
+# Build Next.js (without standalone)
 RUN npm run build
 
-# Production image
-FROM base AS runner
-WORKDIR /app
-
-RUN apk add --no-cache openssl
+# Create data directories
+RUN mkdir -p /var/data/uploads
 
 ENV NODE_ENV=production
 ENV PORT=8080
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-RUN mkdir -p ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/scripts ./scripts
-COPY --from=builder /app/node_modules/ts-node ./node_modules/ts-node
-COPY --from=builder /app/node_modules/typescript ./node_modules/typescript
-COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
-COPY --from=builder /app/node_modules/.bin/ts-node ./node_modules/.bin/ts-node
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
-
-RUN mkdir -p /var/data/uploads && chown -R nextjs:nodejs /var/data /app
-
-USER nextjs
-
 ENV DATABASE_URL="file:/var/data/iso27001.db"
 ENV UPLOAD_DIR="/var/data"
 
