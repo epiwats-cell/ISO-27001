@@ -6,6 +6,22 @@ import { createAuditLog } from "@/lib/audit";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
+export const maxDuration = 60;
+
+const MIME_MAP: Record<string, string> = {
+  ".pdf": "application/pdf",
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".xls": "application/vnd.ms-excel",
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ".ppt": "application/vnd.ms-powerpoint",
+  ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".txt": "text/plain",
+};
+
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,7 +46,7 @@ export async function POST(request: NextRequest) {
       : path.join(process.cwd(), "uploads");
     await mkdir(uploadDir, { recursive: true });
 
-    const ext = path.extname(file.name);
+    const ext = path.extname(file.name).toLowerCase();
     const safeFileName = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
     const filePath = path.join(uploadDir, safeFileName);
 
@@ -38,6 +54,8 @@ export async function POST(request: NextRequest) {
     await writeFile(filePath, Buffer.from(bytes));
 
     const userId = (session.user as { id?: string }).id!;
+    // Some browsers send empty MIME type for Office files — infer from extension
+    const fileType = file.type || MIME_MAP[ext] || "application/octet-stream";
 
     const document = await prisma.document.create({
       data: {
@@ -45,7 +63,7 @@ export async function POST(request: NextRequest) {
         description,
         fileName: file.name,
         fileSize: file.size,
-        fileType: file.type,
+        fileType,
         filePath: `/uploads/${safeFileName}`,
         version,
         controlId,
