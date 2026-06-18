@@ -40,9 +40,12 @@ COPY --from=builder /app/node_modules/typescript ./node_modules/typescript
 COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 
-RUN mkdir -p /var/data/uploads && chown -R nextjs:nodejs /var/data
+RUN mkdir -p /var/data/uploads && chown -R nextjs:nodejs /var/data /app
 
 USER nextjs
+
+ENV DATABASE_URL="file:/var/data/iso27001.db"
+ENV UPLOAD_DIR="/var/data"
 
 EXPOSE 8080
 
