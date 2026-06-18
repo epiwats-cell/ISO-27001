@@ -25,7 +25,7 @@ console.log(`New database: ${isNewDb}`);
 
 try {
   console.log("Syncing database schema...");
-  execSync("npx prisma db push", {
+  execSync("./node_modules/.bin/prisma db push", {
     stdio: "inherit",
     env: { ...process.env, DATABASE_URL: dbUrl },
   });
@@ -33,7 +33,7 @@ try {
   if (isNewDb) {
     console.log("Seeding initial data...");
     execSync(
-      `npx ts-node --compiler-options '{"module":"CommonJS"}' prisma/seed.ts`,
+      `./node_modules/.bin/ts-node --compiler-options '{"module":"CommonJS"}' prisma/seed.ts`,
       {
         stdio: "inherit",
         env: { ...process.env, DATABASE_URL: dbUrl },
