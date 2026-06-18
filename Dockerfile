@@ -38,6 +38,9 @@ COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/node_modules/ts-node ./node_modules/ts-node
 COPY --from=builder /app/node_modules/typescript ./node_modules/typescript
 COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /app/node_modules/.bin/ts-node ./node_modules/.bin/ts-node
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 
 RUN mkdir -p /var/data/uploads && chown -R nextjs:nodejs /var/data /app
