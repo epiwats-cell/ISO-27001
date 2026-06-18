@@ -41,6 +41,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // Verify controlId exists
+    const control = await prisma.iSOControl.findUnique({ where: { id: controlId } });
+    if (!control) {
+      return NextResponse.json({ error: `ไม่พบ ISO Control (id: ${controlId}) กรุณาเลือกใหม่`, detail: `controlId "${controlId}" not found` }, { status: 400 });
+    }
+
     const uploadDir = process.env.UPLOAD_DIR
       ? path.join(process.env.UPLOAD_DIR, "uploads")
       : path.join(process.cwd(), "uploads");
