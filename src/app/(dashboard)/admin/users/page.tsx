@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import { User } from "@/types";
 import { roleConfig, formatDate } from "@/lib/utils";
-import { UserPlus, Trash2, Pencil, X, Check, Users } from "lucide-react";
+import { UserPlus, Trash2, Pencil, X, Check, Users, KeyRound } from "lucide-react";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -13,6 +13,9 @@ export default function UsersPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ email: "", name: "", password: "", role: "user", department: "" });
   const [editForm, setEditForm] = useState({ name: "", role: "user", department: "" });
+  const [resetId, setResetId] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [resetMsg, setResetMsg] = useState("");
 
   const loadUsers = () => {
     fetch("/api/admin/users").then((r) => r.json()).then((d) => { setUsers(d); setLoading(false); });
@@ -30,6 +33,17 @@ export default function UsersPage() {
     await fetch(`/api/admin/users/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editForm) });
     setEditId(null);
     loadUsers();
+  };
+
+  const resetPassword = async (id: string) => {
+    if (!newPassword || newPassword.length < 6) { setResetMsg("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"); return; }
+    const res = await fetch(`/api/admin/users/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: newPassword }) });
+    if (res.ok) {
+      setResetMsg("เปลี่ยนรหัสผ่านสำเร็จ");
+      setTimeout(() => { setResetId(null); setNewPassword(""); setResetMsg(""); }, 1500);
+    } else {
+      setResetMsg("เกิดข้อผิดพลาด");
+    }
   };
 
   const deleteUser = async (id: string) => {
@@ -57,6 +71,36 @@ export default function UsersPage() {
             เพิ่มผู้ใช้งาน
           </button>
         </div>
+
+        {/* Reset password modal */}
+        {resetId && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
+              <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-blue-500" />
+                รีเซ็ตรหัสผ่าน
+              </h3>
+              <p className="text-sm text-gray-500 mb-4">
+                {users.find(u => u.id === resetId)?.name}
+              </p>
+              <input
+                type="password"
+                placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                autoFocus
+              />
+              {resetMsg && (
+                <p className={`text-sm mb-3 ${resetMsg.includes("สำเร็จ") ? "text-green-600" : "text-red-500"}`}>{resetMsg}</p>
+              )}
+              <div className="flex gap-2">
+                <button onClick={() => resetPassword(resetId)} className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700">บันทึก</button>
+                <button onClick={() => { setResetId(null); setNewPassword(""); setResetMsg(""); }} className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-50">ยกเลิก</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Add form */}
         {showAdd && (
@@ -135,8 +179,9 @@ export default function UsersPage() {
                         </>
                       ) : (
                         <>
-                          <button onClick={() => { setEditId(u.id); setEditForm({ name: u.name, role: u.role, department: u.department || "" }); }} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"><Pencil className="w-4 h-4" /></button>
-                          <button onClick={() => deleteUser(u.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={() => { setEditId(u.id); setEditForm({ name: u.name, role: u.role, department: u.department || "" }); }} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="แก้ไข"><Pencil className="w-4 h-4" /></button>
+                          <button onClick={() => { setResetId(u.id); setNewPassword(""); setResetMsg(""); }} className="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded" title="รีเซ็ตรหัสผ่าน"><KeyRound className="w-4 h-4" /></button>
+                          <button onClick={() => deleteUser(u.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded" title="ลบ"><Trash2 className="w-4 h-4" /></button>
                         </>
                       )}
                     </div>
