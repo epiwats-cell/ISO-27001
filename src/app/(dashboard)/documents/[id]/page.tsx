@@ -10,9 +10,12 @@ import { Document } from "@/types";
 import {
   Download, Pencil, Trash2, ArrowLeft, Calendar, HardDrive,
   User, Tag, Clock, CheckCircle, AlertCircle, XCircle, FileText,
-  Eye, EyeOff,
+  Eye, EyeOff, Edit3,
 } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const WordEditor = dynamic(() => import("@/components/WordEditor"), { ssr: false });
 
 const statusTransitions: Record<string, string[]> = {
   draft: ["review"],
@@ -45,6 +48,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
   const [editForm, setEditForm] = useState({ title: "", description: "", version: "", tags: "" });
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showWordEditor, setShowWordEditor] = useState(false);
   const user = session?.user as { role?: string; id?: string } | undefined;
 
   useEffect(() => {
@@ -196,6 +200,42 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
                   >
                     <FileText className="w-12 h-12 text-red-400 mb-2" />
                     <p className="text-sm text-gray-500">คลิกเพื่อดู PDF</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Word Editor */}
+            {(doc.fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+              doc.fileType === "application/msword") && (
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+                  <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                    <Edit3 className="w-4 h-4 text-blue-500" />
+                    แก้ไขเอกสาร Word
+                  </h3>
+                  <button
+                    onClick={() => setShowWordEditor(!showWordEditor)}
+                    className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    {showWordEditor ? (
+                      <><EyeOff className="w-4 h-4" /> ซ่อน</>
+                    ) : (
+                      <><Edit3 className="w-4 h-4" /> เปิดแก้ไข</>
+                    )}
+                  </button>
+                </div>
+                {showWordEditor ? (
+                  <div className="p-4">
+                    <WordEditor documentId={id} onSaved={() => {}} />
+                  </div>
+                ) : (
+                  <div
+                    className="flex flex-col items-center justify-center py-10 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => setShowWordEditor(true)}
+                  >
+                    <FileText className="w-12 h-12 text-blue-400 mb-2" />
+                    <p className="text-sm text-gray-500">คลิกเพื่อแก้ไขเอกสาร Word</p>
                   </div>
                 )}
               </div>
