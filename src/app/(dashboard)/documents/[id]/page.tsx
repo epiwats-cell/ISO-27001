@@ -10,6 +10,7 @@ import { Document } from "@/types";
 import {
   Download, Pencil, Trash2, ArrowLeft, Calendar, HardDrive,
   User, Tag, Clock, CheckCircle, AlertCircle, XCircle, FileText,
+  Eye, EyeOff,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -43,6 +44,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ title: "", description: "", version: "", tags: "" });
   const [saving, setSaving] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const user = session?.user as { role?: string; id?: string } | undefined;
 
   useEffect(() => {
@@ -78,7 +80,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
   return (
     <div>
       <Header />
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-6 max-w-6xl mx-auto">
         {/* Back link */}
         <Link href={`/controls/${doc.control?.code}`} className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
           <ArrowLeft className="w-4 h-4" /> กลับไป {doc.control?.code}
@@ -159,6 +161,64 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
                 </div>
               )}
             </div>
+
+            {/* PDF Preview */}
+            {doc.fileType === "application/pdf" && (
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+                  <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-blue-500" />
+                    ดูเอกสาร PDF
+                  </h3>
+                  <button
+                    onClick={() => setShowPreview(!showPreview)}
+                    className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    {showPreview ? (
+                      <><EyeOff className="w-4 h-4" /> ซ่อน</>
+                    ) : (
+                      <><Eye className="w-4 h-4" /> แสดง</>
+                    )}
+                  </button>
+                </div>
+                {showPreview && (
+                  <iframe
+                    src={`/api/files/${doc.filePath.split("/").pop()}#toolbar=1`}
+                    className="w-full border-0"
+                    style={{ height: "75vh" }}
+                    title={doc.title}
+                  />
+                )}
+                {!showPreview && (
+                  <div
+                    className="flex flex-col items-center justify-center py-10 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => setShowPreview(true)}
+                  >
+                    <FileText className="w-12 h-12 text-red-400 mb-2" />
+                    <p className="text-sm text-gray-500">คลิกเพื่อดู PDF</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* รูปภาพ Preview */}
+            {doc.fileType.startsWith("image/") && (
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div className="px-5 py-3 border-b border-gray-100">
+                  <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-blue-500" />
+                    ดูรูปภาพ
+                  </h3>
+                </div>
+                <div className="p-4">
+                  <img
+                    src={`/api/files/${doc.filePath.split("/").pop()}`}
+                    alt={doc.title}
+                    className="w-full rounded-lg object-contain max-h-96"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Audit log */}
             {doc.auditLogs && doc.auditLogs.length > 0 && (

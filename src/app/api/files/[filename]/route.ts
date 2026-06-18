@@ -38,10 +38,17 @@ export async function GET(
     };
     const contentType = contentTypes[ext] || "application/octet-stream";
 
+    // PDF และรูปภาพให้แสดงใน browser ได้เลย (inline) ที่เหลือให้ download
+    const inlineTypes = ["application/pdf", "image/png", "image/jpeg", "text/plain"];
+    const disposition = inlineTypes.includes(contentType)
+      ? `inline; filename="${safeFilename}"`
+      : `attachment; filename="${safeFilename}"`;
+
     return new NextResponse(file, {
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${safeFilename}"`,
+        "Content-Disposition": disposition,
+        "Cache-Control": "private, max-age=3600",
       },
     });
   } catch {
