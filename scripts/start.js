@@ -25,7 +25,7 @@ console.log(`New database: ${isNewDb}`);
 
 try {
   console.log("Syncing database schema...");
-  execSync("npx prisma db push --skip-generate", {
+  execSync("npx prisma db push", {
     stdio: "inherit",
     env: { ...process.env, DATABASE_URL: dbUrl },
   });
