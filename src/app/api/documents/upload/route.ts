@@ -44,7 +44,14 @@ export async function POST(request: NextRequest) {
     // Verify controlId exists
     const control = await prisma.iSOControl.findUnique({ where: { id: controlId } });
     if (!control) {
-      return NextResponse.json({ error: `ไม่พบ ISO Control (id: ${controlId}) กรุณาเลือกใหม่`, detail: `controlId "${controlId}" not found` }, { status: 400 });
+      return NextResponse.json({ error: `ไม่พบ ISO Control กรุณาเลือกใหม่`, detail: `controlId "${controlId}" not found` }, { status: 400 });
+    }
+
+    // Verify userId exists in DB
+    const userId = (session.user as { id?: string }).id!;
+    const userExists = await prisma.user.findUnique({ where: { id: userId } });
+    if (!userExists) {
+      return NextResponse.json({ error: "Session หมดอายุ กรุณา logout แล้ว login ใหม่", detail: `userId "${userId}" not found` }, { status: 401 });
     }
 
     const uploadDir = process.env.UPLOAD_DIR
@@ -59,7 +66,6 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     await writeFile(filePath, Buffer.from(bytes));
 
-    const userId = (session.user as { id?: string }).id!;
     // Some browsers send empty MIME type for Office files — infer from extension
     const fileType = file.type || MIME_MAP[ext] || "application/octet-stream";
 
