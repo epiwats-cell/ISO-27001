@@ -81,6 +81,15 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
   const canEdit = user?.role === "admin" || user?.id === doc.uploadedBy;
   const transitions = statusTransitions[doc.status] || [];
 
+  // Infer file type from extension if fileType is missing
+  const fileExt = doc.fileName?.split(".").pop()?.toLowerCase() || "";
+  const effectiveFileType = doc.fileType ||
+    (fileExt === "pdf" ? "application/pdf" :
+     fileExt === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" :
+     fileExt === "doc" ? "application/msword" :
+     ["png","jpg","jpeg"].includes(fileExt) ? `image/${fileExt === "jpg" ? "jpeg" : fileExt}` :
+     "");
+
   return (
     <div>
       <Header />
@@ -167,7 +176,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
             </div>
 
             {/* PDF Preview */}
-            {doc.fileType === "application/pdf" && (
+            {effectiveFileType === "application/pdf" && (
               <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-800 flex items-center gap-2">
@@ -206,8 +215,8 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
             )}
 
             {/* Word Editor */}
-            {(doc.fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-              doc.fileType === "application/msword") && (
+            {(effectiveFileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+              effectiveFileType === "application/msword") && (
               <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-800 flex items-center gap-2">
@@ -242,7 +251,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
             )}
 
             {/* รูปภาพ Preview */}
-            {doc.fileType.startsWith("image/") && (
+            {effectiveFileType.startsWith("image/") && (
               <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div className="px-5 py-3 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-800 flex items-center gap-2">
