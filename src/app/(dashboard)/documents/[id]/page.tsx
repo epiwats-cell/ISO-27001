@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Header from "@/components/Header";
@@ -34,8 +34,8 @@ const nextStatusIcon: Record<string, React.ReactNode> = {
   obsolete: <XCircle className="w-4 h-4" />,
 };
 
-export default function DocumentDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function DocumentDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
   const { data: session } = useSession();
   const [doc, setDoc] = useState<Document & { auditLogs?: { id: string; action: string; details: string; createdAt: string; user: { name: string } }[] } | null>(null);

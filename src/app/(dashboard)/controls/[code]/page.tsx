@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import DocumentCard from "@/components/DocumentCard";
 import { Document, ISOControl } from "@/types";
@@ -15,9 +15,8 @@ const statusOptions = [
   { value: "obsolete", label: "ยกเลิก" },
 ];
 
-export default function ControlPage({ params }: { params: Promise<{ code: string }> }) {
-  const { code } = use(params);
-  const decodedCode = decodeURIComponent(code);
+export default function ControlPage({ params }: { params: { code: string } }) {
+  const decodedCode = decodeURIComponent(params.code);
   const [control, setControl] = useState<ISOControl | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [total, setTotal] = useState(0);

@@ -4,11 +4,11 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createAuditLog } from "@/lib/audit";
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id } = await params;
+  const { id } = params;
   const document = await prisma.document.findUnique({
     where: { id },
     include: {
@@ -26,11 +26,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   return NextResponse.json(document);
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id } = await params;
+  const { id } = params;
   const body = await request.json();
   const userId = (session.user as { id?: string }).id!;
 
@@ -60,7 +60,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   return NextResponse.json(document);
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -69,7 +69,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { id } = await params;
+  const { id } = params;
   const document = await prisma.document.findUnique({ where: { id } });
   if (!document) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

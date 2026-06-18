@@ -6,12 +6,12 @@ import path from "path";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ filename: string }> }
+  { params }: { params: { filename: string } }
 ) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { filename } = await params;
+  const { filename } = params;
   const safeFilename = path.basename(filename);
 
   const uploadDir = process.env.UPLOAD_DIR

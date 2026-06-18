@@ -4,14 +4,14 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   const sessionUser = session?.user as { role?: string } | undefined;
   if (!session || sessionUser?.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { id } = await params;
+  const { id } = params;
   const body = await request.json();
   const data: Record<string, unknown> = {};
 
@@ -29,14 +29,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   return NextResponse.json(user);
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   const sessionUser = session?.user as { role?: string; id?: string } | undefined;
   if (!session || sessionUser?.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { id } = await params;
+  const { id } = params;
   if (id === sessionUser?.id) {
     return NextResponse.json({ error: "Cannot delete yourself" }, { status: 400 });
   }
