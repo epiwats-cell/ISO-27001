@@ -27,6 +27,7 @@ import {
   ChevronDown,
   ChevronRight,
   ShieldCheck,
+  ScanText,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -75,6 +76,7 @@ export default function Sidebar() {
         <NavItem href="/dashboard" icon={LayoutDashboard} label="แดชบอร์ด" pathname={pathname} />
         <NavItem href="/documents/upload" icon={Upload} label="อัปโหลดเอกสาร" pathname={pathname} />
         <NavItem href="/search" icon={Search} label="ค้นหาเอกสาร" pathname={pathname} />
+        <NavItem href="/ocr" icon={ScanText} label="OCR สแกนเอกสาร" pathname={pathname} />
 
         {/* ISO 27001 Controls */}
         <div className="pt-2">
